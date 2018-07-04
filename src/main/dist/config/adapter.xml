@@ -1,0 +1,240 @@
+<adapter>
+  <unique-id>interlok-service-tester-example</unique-id>
+  <start-up-event-imp>com.adaptris.core.event.StandardAdapterStartUpEvent</start-up-event-imp>
+  <heartbeat-event-imp>com.adaptris.core.HeartbeatEvent</heartbeat-event-imp>
+  <shared-components>
+    <connections>
+      <advanced-jdbc-pooled-connection>
+        <unique-id>sql-connection</unique-id>
+        <test-statement>SELECT DATABASE(), VERSION(), NOW(), USER();</test-statement>
+        <driver-imp>${db.driver}</driver-imp>
+        <username>${db.user}</username>
+        <password>${db.password}</password>
+        <connect-url>${db.url}</connect-url>
+      </advanced-jdbc-pooled-connection>
+    </connections>
+    <services/>
+  </shared-components>
+  <event-handler class="default-event-handler">
+    <unique-id>DefaultEventHandler</unique-id>
+    <connection class="null-connection">
+      <unique-id>pensive-leavitt</unique-id>
+    </connection>
+    <producer class="null-message-producer">
+      <unique-id>high-turing</unique-id>
+    </producer>
+  </event-handler>
+  <message-error-handler class="null-processing-exception-handler">
+    <unique-id>adoring-jepsen</unique-id>
+  </message-error-handler>
+  <failed-message-retrier class="no-retries">
+    <unique-id>desperate-archimedes</unique-id>
+  </failed-message-retrier>
+  <channel-list>
+    <channel>
+      <consume-connection class="jetty-embedded-connection">
+        <unique-id>jetty-embedded-connection</unique-id>
+      </consume-connection>
+      <produce-connection class="null-connection">
+        <unique-id>null-connection</unique-id>
+      </produce-connection>
+      <workflow-list>
+        <pooling-workflow>
+          <consumer class="jetty-message-consumer">
+            <unique-id>/orders</unique-id>
+            <destination class="configured-consume-destination">
+              <configured-thread-name>jetty-orders</configured-thread-name>
+              <destination>/orders/*</destination>
+            </destination>
+            <parameter-handler class="jetty-http-ignore-parameters"/>
+            <header-handler class="jetty-http-ignore-headers"/>
+          </consumer>
+          <service-collection class="service-list">
+            <unique-id>happy-sammet</unique-id>
+            <services>
+              <add-timestamp-metadata-service>
+                <unique-id>add-timestamp</unique-id>
+                <metadata-key>timestamp</metadata-key>
+                <date-format-builder>
+                  <format>yyyy-MM-dd'T'HH:mm:ssZ</format>
+                </date-format-builder>
+              </add-timestamp-metadata-service>
+              <branching-service-collection>
+                <unique-id>route-message</unique-id>
+                <services>
+                  <jetty-routing-service>
+                    <unique-id>jetty-routing</unique-id>
+                    <route>
+                      <url-pattern>/orders/([^/]+)</url-pattern>
+                      <method>GET</method>
+                      <metadata-key>orderId</metadata-key>
+                      <service-id>get</service-id>
+                    </route>
+                    <route>
+                      <url-pattern>/orders/([^/]+)</url-pattern>
+                      <method>DELETE</method>
+                      <metadata-key>orderId</metadata-key>
+                      <service-id>delete</service-id>
+                    </route>
+                    <route>
+                      <url-pattern>/orders/([^/]+)</url-pattern>
+                      <method>PUT</method>
+                      <metadata-key>orderId</metadata-key>
+                      <service-id>put</service-id>
+                    </route>
+                    <default-service-id>not-found</default-service-id>
+                  </jetty-routing-service>
+                  <service-list>
+                    <unique-id>delete</unique-id>
+                    <services>
+                      <jdbc-data-capture-service>
+                        <unique-id>delete-order</unique-id>
+                        <connection class="shared-connection">
+                          <lookup-name>sql-connection</lookup-name>
+                        </connection>
+                        <parameter-applicator class="sequential-parameter-applicator"/>
+                        <jdbc-integer-statement-parameter>
+                          <query-string>orderId</query-string>
+                          <query-type>metadata</query-type>
+                        </jdbc-integer-statement-parameter>
+                        <statement>DELETE FROM orders WHERE orderId = ?</statement>
+                      </jdbc-data-capture-service>
+                      <payload-from-metadata-service>
+                        <unique-id>delete-response-message</unique-id>
+                        <metadata-tokens/>
+                        <template>&lt;message&gt;&lt;status&gt;OK&lt;/status&gt;&lt;timestamp&gt;%message{timestamp}&lt;/timestamp&gt;&lt;/message&gt;</template>
+                      </payload-from-metadata-service>
+                    </services>
+                  </service-list>
+                  <service-list>
+                    <unique-id>put</unique-id>
+                    <services>
+                      <jdbc-data-capture-service>
+                        <unique-id>put-order</unique-id>
+                        <connection class="shared-connection">
+                          <lookup-name>sql-connection</lookup-name>
+                        </connection>
+                        <parameter-applicator class="sequential-parameter-applicator"/>
+                        <jdbc-integer-statement-parameter>
+                          <query-string>orderId</query-string>
+                          <query-type>metadata</query-type>
+                        </jdbc-integer-statement-parameter>
+                        <jdbc-string-statement-parameter>
+                          <query-string>/order/orderItem</query-string>
+                          <query-type>xpath</query-type>
+                        </jdbc-string-statement-parameter>
+                        <jdbc-timestamp-statement-parameter>
+                          <query-string>timestamp</query-string>
+                          <query-type>metadata</query-type>
+                          <date-format>yyyy-MM-dd'T'HH:mm:ssZ</date-format>
+                        </jdbc-timestamp-statement-parameter>
+                        <statement>INSERT INTO orders (orderId, orderItem, orderDate) VALUE (?, ?, ?)</statement>
+                      </jdbc-data-capture-service>
+                      <payload-from-metadata-service>
+                        <unique-id>put-response-message</unique-id>
+                        <metadata-tokens/>
+                        <template>&lt;message&gt;&lt;status&gt;OK&lt;/status&gt;&lt;timestamp&gt;%message{timestamp}&lt;/timestamp&gt;&lt;/message&gt;</template>
+                      </payload-from-metadata-service>
+                    </services>
+                  </service-list>
+                  <service-list>
+                    <unique-id>get</unique-id>
+                    <services>
+                      <jdbc-data-query-service>
+                        <unique-id>get-order</unique-id>
+                        <connection class="shared-connection">
+                          <lookup-name>sql-connection</lookup-name>
+                        </connection>
+                        <parameter-applicator class="sequential-parameter-applicator"/>
+                        <jdbc-integer-statement-parameter>
+                          <query-string>orderId</query-string>
+                          <query-type>metadata</query-type>
+                        </jdbc-integer-statement-parameter>
+                        <statement-creator class="jdbc-configured-sql-statement">
+                          <statement>SELECT * FROM orders WHERE orderId = ?</statement>
+                        </statement-creator>
+                        <result-set-translator class="jdbc-xml-payload-translator">
+                          <column-name-style>NoStyle</column-name-style>
+                        </result-set-translator>
+                      </jdbc-data-query-service>
+                      <service-list>
+                        <unique-id>get-mapping</unique-id>
+                        <services>
+                          <add-metadata-service>
+                            <unique-id>add-constants</unique-id>
+                            <metadata-element>
+                              <key>company</key>
+                              <value>Adaptris</value>
+                            </metadata-element>
+                          </add-metadata-service>
+                          <xml-transform-service>
+                            <unique-id>map-orders</unique-id>
+                            <url>${mapping.url}</url>
+                            <metadata-key>transformurl</metadata-key>
+                            <xml-transformer-factory class="xslt-transformer-factory">
+                              <transformer-factory-attributes/>
+                              <transformer-factory-features/>
+                            </xml-transformer-factory>
+                            <transform-parameter class="xml-transform-string-parameter">
+                              <metadata-filter>
+                                <include-pattern>company</include-pattern>
+                                <include-pattern>timestamp</include-pattern>
+                              </metadata-filter>
+                            </transform-parameter>
+                          </xml-transform-service>
+                        </services>
+                      </service-list>
+                      <add-metadata-service>
+                        <unique-id>add-status</unique-id>
+                        <metadata-element>
+                          <key>status</key>
+                          <value>200</value>
+                        </metadata-element>
+                      </add-metadata-service>
+                    </services>
+                  </service-list>
+                  <service-list>
+                    <unique-id>not-found</unique-id>
+                    <services>
+                      <payload-from-metadata-service>
+                        <unique-id>error-response-message</unique-id>
+                        <metadata-tokens/>
+                        <template>&lt;message&gt;&lt;status&gt;ERROR&lt;/status&gt;&lt;timestamp&gt;%message{timestamp}&lt;/timestamp&gt;&lt;/message&gt;</template>
+                      </payload-from-metadata-service>
+                      <add-metadata-service>
+                        <unique-id>add-status</unique-id>
+                        <metadata-element>
+                          <key>status</key>
+                          <value>400</value>
+                        </metadata-element>
+                      </add-metadata-service>
+                    </services>
+                  </service-list>
+                </services>
+                <first-service-id>jetty-routing</first-service-id>
+              </branching-service-collection>
+            </services>
+          </service-collection>
+          <producer class="jetty-standard-response-producer">
+            <unique-id>jetty-response</unique-id>
+            <status-provider class="http-metadata-status">
+              <code-key>status</code-key>
+              <default-status>OK_200</default-status>
+            </status-provider>
+            <response-header-provider class="jetty-no-response-headers"/>
+            <content-type-provider class="http-configured-content-type-provider">
+              <mime-type>application/xml</mime-type>
+            </content-type-provider>
+          </producer>
+          <produce-exception-handler class="null-produce-exception-handler"/>
+          <unique-id>orders-workflow</unique-id>
+        </pooling-workflow>
+      </workflow-list>
+      <unique-id>jetty-channel</unique-id>
+    </channel>
+  </channel-list>
+  <message-error-digester class="standard-message-error-digester">
+    <unique-id>ErrorDigest</unique-id>
+    <digest-max-size>100</digest-max-size>
+  </message-error-digester>
+</adapter>

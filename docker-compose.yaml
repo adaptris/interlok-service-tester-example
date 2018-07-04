@@ -1,0 +1,21 @@
+version: '3.2'
+services:
+  interlok:
+    image: adaptris/interlok-service-tester-example:latest
+    environment:
+      JVM_ARGS: -Xmx512m
+    ports:
+      - 8080:8080
+      - 5555:5555
+    links:
+      - mysql
+  mysql:
+    image: mysql:5.7
+    hostname: mysql.local
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: orders
+      MYSQL_USER: backend
+      MYSQL_PASSWORD: backend
+    volumes:
+      - ./src/main/sql:/docker-entrypoint-initdb.d
