@@ -1,5 +1,7 @@
 # interlok-service-tester-example
 
+See this [blog](https://interlok.adaptris.net/blog/2018/07/03/testing-interlok-config.html) post for more information about getting started with `interlok-service-tester`.
+
 ## Testing
 
 ```
