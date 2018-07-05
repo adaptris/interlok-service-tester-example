@@ -40,6 +40,9 @@ dependencies {
 }
 
 task test(overwrite: true) {
+  onlyIf{
+    new File("$projectDir/src/test/service-tester/service-tester.xml").exists()
+  }
   doLast {
     javaexec {
       main = 'com.adaptris.tester.runners.TestExecutor'
@@ -53,6 +56,9 @@ task test(overwrite: true) {
 }
 
 task junitReport {
+  onlyIf{
+    test.didWork
+  }
   doLast {
     ant.taskdef(
       name: 'junitreport',
