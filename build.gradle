@@ -1,13 +1,29 @@
+buildscript {
+  ext {
+    adpCoreVersion = project.hasProperty('adpCoreVersion') ? project.getProperty('adpCoreVersion') : '3.8-SNAPSHOT'
+    defaultNexusRepo = project.hasProperty('defaultNexusRepo') ? project.getProperty('defaultNexusRepo') : 'https://repo1.maven.org/maven2/'
+  }
+  configure([buildscript.repositories, project.repositories]) {
+    maven {
+      url uri('../interlok-service-tester/build/repo')
+   }
+   maven { url "$defaultNexusRepo" }
+   maven { url "https://development.adaptris.net/nexus/content/groups/public" }
+   maven { url "https://development.adaptris.net/nexus/content/repositories/snapshots" }
+   maven { url "https://development.adaptris.net/nexus/content/repositories/releases" }
+  }
+  dependencies {
+    classpath ("com.adaptris:interlok-service-tester:$adpCoreVersion") {changing=true}
+    classpath  ("org.apache.ant:ant-junit:1.10.5")
+  }
+}
+
 plugins {
   id "java"
   id "distribution"
   id "com.palantir.docker" version "0.19.2"
 }
-
-ext {
-  adpCoreVersion = project.hasProperty('adpCoreVersion') ? project.getProperty('adpCoreVersion') : '3.7-SNAPSHOT'
-  defaultNexusRepo = project.hasProperty('defaultNexusRepo') ? project.getProperty('defaultNexusRepo') : 'https://repo1.maven.org/maven2/'
-}
+apply plugin: "com.adaptris.interlok-service-tester"
 
 distTar.enabled=false
 distZip.enabled=false
@@ -17,65 +33,18 @@ processResources.enabled=false
 classes.enabled=false
 jar.enabled=false
 
-repositories {
-  maven { url "$defaultNexusRepo" }
-  maven { url "https://development.adaptris.net/nexus/content/groups/public" }
-  maven { url "https://development.adaptris.net/nexus/content/repositories/snapshots" }
-  maven { url "https://development.adaptris.net/nexus/content/repositories/releases" }
-}
-
 configurations() {
   war{}
-  antJunit{}
 }
 
 dependencies {
-  compile ("com.adaptris:adp-core:$adpCoreVersion") {changing=true}
+  compile ("com.adaptris:interlok-core:$adpCoreVersion") {changing=true}
   compile ("com.adaptris:interlok-boot:$adpCoreVersion") {changing=true}
-  compile ("com.adaptris:adp-varsub:$adpCoreVersion") {changing=true}
+  compile ("com.adaptris:interlok-varsub:$adpCoreVersion") {changing=true}
   compile ("com.adaptris:interlok-service-tester:$adpCoreVersion") {changing=true}
   compile ("mysql:mysql-connector-java:5.1.42")
   war ("com.adaptris.ui:interlok:$adpCoreVersion@war") {changing=true}
-  antJunit ("org.apache.ant:ant-junit:1.8.2")
 }
-
-task test(overwrite: true) {
-  onlyIf{
-    new File("$projectDir/src/test/service-tester/service-tester.xml").exists()
-  }
-  doLast {
-    javaexec {
-      main = 'com.adaptris.tester.runners.TestExecutor'
-      classpath = sourceSets.test.runtimeClasspath
-      args "-serviceTest"
-      args "$projectDir/src/test/service-tester/service-tester.xml"
-      args "-serviceTestOutput"
-      args "$buildDir/test-results/"
-    }
-  }
-}
-
-task junitReport {
-  onlyIf{
-    test.didWork
-  }
-  doLast {
-    ant.taskdef(
-      name: 'junitreport',
-      classname: 'org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator',
-      classpath: configurations.antJunit.asPath
-    )
-
-    ant.junitreport(todir: "$buildDir/test-results") {
-      fileset(dir: "$buildDir/test-results", includes: 'TEST-*.xml')
-      report(todir: "$buildDir/test-results/html", format: "frames"	)
-    }
-  }
-}
-
-test.dependsOn += processTestResources
-test.finalizedBy junitReport
-
 
 distributions {
     main {
@@ -100,4 +69,4 @@ docker {
 }
 
 docker.dependsOn installDist
-installDist.dependsOn test
+installDist.dependsOn interlokServiceTester
