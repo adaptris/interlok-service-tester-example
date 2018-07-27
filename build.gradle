@@ -4,9 +4,6 @@ buildscript {
     defaultNexusRepo = project.hasProperty('defaultNexusRepo') ? project.getProperty('defaultNexusRepo') : 'https://repo1.maven.org/maven2/'
   }
   configure([buildscript.repositories, project.repositories]) {
-    maven {
-      url uri('../interlok-service-tester/build/repo')
-   }
    maven { url "$defaultNexusRepo" }
    maven { url "https://development.adaptris.net/nexus/content/groups/public" }
    maven { url "https://development.adaptris.net/nexus/content/repositories/snapshots" }
