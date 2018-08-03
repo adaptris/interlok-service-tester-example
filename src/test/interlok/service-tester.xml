@@ -136,7 +136,7 @@
       </test-case>
       <service-to-test>
         <source class="file-source">
-          <file>./src/main/dist/config/adapter.xml</file>
+          <file>./src/main/interlok/config/adapter.xml</file>
         </source>
         <preprocessors>
           <service-unique-id-preprocessor>
@@ -180,7 +180,7 @@
       </test-case>
       <service-to-test>
         <source class="file-source">
-          <file>./src/main/dist/config/adapter.xml</file>
+          <file>./src/main/interlok/config/adapter.xml</file>
         </source>
         <preprocessors>
           <service-unique-id-preprocessor>
@@ -221,7 +221,7 @@
       </test-case>
       <service-to-test>
         <source class="file-source">
-          <file>./src/main/dist/config/adapter.xml</file>
+          <file>./src/main/interlok/config/adapter.xml</file>
         </source>
         <preprocessors>
           <service-unique-id-preprocessor>
@@ -324,7 +324,7 @@
       </test-case>
       <service-to-test>
         <source class="file-source">
-          <file>./src/main/dist/config/adapter.xml</file>
+          <file>./src/main/interlok/config/adapter.xml</file>
         </source>
         <preprocessors>
           <service-unique-id-preprocessor>
@@ -334,7 +334,7 @@
             <properties>
               <key-value-pair>
                 <key>mapping.url</key>
-                <value>./src/main/dist/mappings/orders.xsl</value>
+                <value>./src/main/interlok/mappings/orders.xsl</value>
               </key-value-pair>
             </properties>
           </properties-variable-substitution-preprocessor>

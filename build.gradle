@@ -44,25 +44,28 @@ dependencies {
 }
 
 distributions {
-    main {
-        contents {
-            into('lib') {
-                from(project.configurations.runtime)
-            }
-            into('webapps') {
-                from(project.configurations.war)
-            }
-            rename '(.*)-[0-9]+\\..*.jar', '$1.jar'
-            rename '(.*)-[0-9]+\\..*.war', '$1.war'
-        }
+  main {
+    contents {
+      from {
+        "$projectDir/src/main/interlok"
+      }
+      into('lib') {
+        from(project.configurations.runtime)
+      }
+      into('webapps') {
+        from(project.configurations.war)
+      }
+      rename '(.*)-[0-9]+\\..*.jar', '$1.jar'
+      rename '(.*)-[0-9]+\\..*.war', '$1.war'
     }
+  }
 }
 
 docker {
-    name "adaptris/interlok-service-tester-example"
-    tags 'latest'
-    pull true
-    files tasks.installDist.outputs
+  name "adaptris/interlok-service-tester-example"
+  tags 'latest'
+  pull true
+  files tasks.installDist.outputs
 }
 
 docker.dependsOn installDist
