@@ -5,7 +5,13 @@
       <connections/>
       <services/>
     </shared-components>
+    <shared-components-provider>
+      <services/>
+    </shared-components-provider>
   </test-client>
+  <source class="default-config-file-source">
+    <file>file:///${service.tester.working.directory}/src/main/interlok/config/adapter.xml</file>
+  </source>
   <helpers/>
   <test-list>
     <unique-id>routing</unique-id>
@@ -30,7 +36,6 @@
         </input-message-provider>
         <assertions>
           <assert-metadata-contains>
-            <unique-id>happy-jepsen</unique-id>
             <metadata>
               <key-value-pair>
                 <key>orderId</key>
@@ -39,7 +44,6 @@
             </metadata>
           </assert-metadata-contains>
           <assert-next-service-id>
-            <unique-id>peaceful-wing</unique-id>
             <value>put</value>
           </assert-next-service-id>
         </assertions>
@@ -63,7 +67,6 @@
         </input-message-provider>
         <assertions>
           <assert-metadata-contains>
-            <unique-id>happy-jepsen</unique-id>
             <metadata>
               <key-value-pair>
                 <key>orderId</key>
@@ -72,7 +75,6 @@
             </metadata>
           </assert-metadata-contains>
           <assert-next-service-id>
-            <unique-id>peaceful-wing</unique-id>
             <value>get</value>
           </assert-next-service-id>
         </assertions>
@@ -96,7 +98,6 @@
         </input-message-provider>
         <assertions>
           <assert-metadata-contains>
-            <unique-id>happy-jepsen</unique-id>
             <metadata>
               <key-value-pair>
                 <key>orderId</key>
@@ -105,7 +106,6 @@
             </metadata>
           </assert-metadata-contains>
           <assert-next-service-id>
-            <unique-id>peaceful-wing</unique-id>
             <value>delete</value>
           </assert-next-service-id>
         </assertions>
@@ -129,18 +129,15 @@
         </input-message-provider>
         <assertions>
           <assert-next-service-id>
-            <unique-id>peaceful-wing</unique-id>
             <value>not-found</value>
           </assert-next-service-id>
         </assertions>
       </test-case>
       <service-to-test>
-        <source class="file-source">
-          <file>./src/main/interlok/config/adapter.xml</file>
-        </source>
+        <source class="main-source"/>
         <preprocessors>
           <service-unique-id-preprocessor>
-            <string>jetty-routing</string>
+            <service>jetty-routing</service>
           </service-unique-id-preprocessor>
         </preprocessors>
       </service-to-test>
@@ -167,24 +164,20 @@
           <assert-xpath-equals>
             <xpath><![CDATA[/message/status/text()]]></xpath>
             <namespace-context/>
-            <unique-id>elated-lewin</unique-id>
             <value>OK</value>
           </assert-xpath-equals>
           <assert-xpath-equals>
             <xpath><![CDATA[/message/timestamp/text()]]></xpath>
             <namespace-context/>
-            <unique-id>berserk-bartik</unique-id>
             <value>2018-07-04T10:52:24+0000</value>
           </assert-xpath-equals>
         </assertions>
       </test-case>
       <service-to-test>
-        <source class="file-source">
-          <file>./src/main/interlok/config/adapter.xml</file>
-        </source>
+        <source class="main-source"/>
         <preprocessors>
           <service-unique-id-preprocessor>
-            <string>put-response-message</string>
+            <service>put-response-message</service>
           </service-unique-id-preprocessor>
         </preprocessors>
       </service-to-test>
@@ -208,24 +201,20 @@
           <assert-xpath-equals>
             <xpath><![CDATA[/message/status/text()]]></xpath>
             <namespace-context/>
-            <unique-id>elated-lewin</unique-id>
             <value>OK</value>
           </assert-xpath-equals>
           <assert-xpath-equals>
             <xpath><![CDATA[/message/timestamp/text()]]></xpath>
             <namespace-context/>
-            <unique-id>berserk-bartik</unique-id>
             <value>2018-07-04T10:52:24+0000</value>
           </assert-xpath-equals>
         </assertions>
       </test-case>
       <service-to-test>
-        <source class="file-source">
-          <file>./src/main/interlok/config/adapter.xml</file>
-        </source>
+        <source class="main-source"/>
         <preprocessors>
           <service-unique-id-preprocessor>
-            <string>delete-response-message</string>
+            <service>delete-response-message</service>
           </service-unique-id-preprocessor>
         </preprocessors>
       </service-to-test>
@@ -255,25 +244,21 @@
           <assert-xpath-equals>
             <xpath><![CDATA[/message/status/text()]]></xpath>
             <namespace-context/>
-            <unique-id>elated-lewin</unique-id>
             <value>OK</value>
           </assert-xpath-equals>
           <assert-xpath-equals>
             <xpath><![CDATA[/message/timestamp/text()]]></xpath>
             <namespace-context/>
-            <unique-id>berserk-bartik</unique-id>
             <value>2018-07-04T10:52:24+0000</value>
           </assert-xpath-equals>
           <assert-xpath-equals>
             <xpath><![CDATA[/message/orders/company/text()]]></xpath>
             <namespace-context/>
-            <unique-id>desperate-swanson</unique-id>
             <value>Adaptris</value>
           </assert-xpath-equals>
           <assert-xpath-boolean>
             <xpath><![CDATA[count(/message/orders/order) = 0]]></xpath>
             <namespace-context/>
-            <unique-id>backstabbing-hoover</unique-id>
           </assert-xpath-boolean>
         </assertions>
       </test-case>
@@ -300,41 +285,35 @@
           <assert-xpath-equals>
             <xpath><![CDATA[/message/status/text()]]></xpath>
             <namespace-context/>
-            <unique-id>elated-lewin</unique-id>
             <value>OK</value>
           </assert-xpath-equals>
           <assert-xpath-equals>
             <xpath><![CDATA[/message/timestamp/text()]]></xpath>
             <namespace-context/>
-            <unique-id>berserk-bartik</unique-id>
             <value>2018-07-04T10:52:24+0000</value>
           </assert-xpath-equals>
           <assert-xpath-equals>
             <xpath><![CDATA[/message/orders/company/text()]]></xpath>
             <namespace-context/>
-            <unique-id>desperate-swanson</unique-id>
             <value>Adaptris</value>
           </assert-xpath-equals>
           <assert-xpath-boolean>
             <xpath><![CDATA[count(/message/orders/order) = 1]]></xpath>
             <namespace-context/>
-            <unique-id>backstabbing-hoover</unique-id>
           </assert-xpath-boolean>
         </assertions>
       </test-case>
       <service-to-test>
-        <source class="file-source">
-          <file>./src/main/interlok/config/adapter.xml</file>
-        </source>
+        <source class="main-source"/>
         <preprocessors>
           <service-unique-id-preprocessor>
-            <string>get-mapping</string>
+            <service>get-mapping</service>
           </service-unique-id-preprocessor>
           <properties-variable-substitution-preprocessor>
             <properties>
               <key-value-pair>
                 <key>mapping.url</key>
-                <value>./src/main/interlok/mappings/orders.xsl</value>
+                <value>file:///${service.tester.working.directory}/src/main/interlok/mappings/orders.xsl</value>
               </key-value-pair>
             </properties>
           </properties-variable-substitution-preprocessor>
