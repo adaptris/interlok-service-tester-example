@@ -6,7 +6,6 @@
     <connections>
       <advanced-jdbc-pooled-connection>
         <unique-id>sql-connection</unique-id>
-        <test-statement>SELECT DATABASE(), VERSION(), NOW(), USER();</test-statement>
         <driver-imp>${db.driver}</driver-imp>
         <username>${db.user}</username>
         <password>${db.password}</password>
@@ -42,10 +41,7 @@
         <pooling-workflow>
           <consumer class="jetty-message-consumer">
             <unique-id>/orders</unique-id>
-            <destination class="configured-consume-destination">
-              <configured-thread-name>jetty-orders</configured-thread-name>
-              <destination>/orders/*</destination>
-            </destination>
+            <path>/orders/*</path>
             <parameter-handler class="jetty-http-ignore-parameters"/>
             <header-handler class="jetty-http-ignore-headers"/>
           </consumer>
@@ -65,21 +61,27 @@
                   <jetty-routing-service>
                     <unique-id>jetty-routing</unique-id>
                     <route>
-                      <url-pattern>/orders/([^/]+)</url-pattern>
-                      <method>GET</method>
-                      <metadata-key>orderId</metadata-key>
+                      <condition>
+                        <url-pattern>/orders/([^/]+)</url-pattern>
+                        <method>GET</method>
+                        <metadata-key>orderId</metadata-key>
+                      </condition>
                       <service-id>get</service-id>
                     </route>
                     <route>
-                      <url-pattern>/orders/([^/]+)</url-pattern>
-                      <method>DELETE</method>
-                      <metadata-key>orderId</metadata-key>
+                      <condition>
+                        <url-pattern>/orders/([^/]+)</url-pattern>
+                        <method>DELETE</method>
+                        <metadata-key>orderId</metadata-key>
+                      </condition>
                       <service-id>delete</service-id>
                     </route>
                     <route>
-                      <url-pattern>/orders/([^/]+)</url-pattern>
-                      <method>PUT</method>
-                      <metadata-key>orderId</metadata-key>
+                      <condition>
+                        <url-pattern>/orders/([^/]+)</url-pattern>
+                        <method>PUT</method>
+                        <metadata-key>orderId</metadata-key>
+                      </condition>
                       <service-id>put</service-id>
                     </route>
                     <default-service-id>not-found</default-service-id>
@@ -99,11 +101,11 @@
                         </jdbc-integer-statement-parameter>
                         <statement>DELETE FROM orders WHERE orderId = ?</statement>
                       </jdbc-data-capture-service>
-                      <payload-from-metadata-service>
+                      <payload-from-template>
                         <unique-id>delete-response-message</unique-id>
                         <metadata-tokens/>
                         <template>&lt;message&gt;&lt;status&gt;OK&lt;/status&gt;&lt;timestamp&gt;%message{timestamp}&lt;/timestamp&gt;&lt;/message&gt;</template>
-                      </payload-from-metadata-service>
+                      </payload-from-template>
                     </services>
                   </service-list>
                   <service-list>
@@ -130,11 +132,11 @@
                         </jdbc-timestamp-statement-parameter>
                         <statement>INSERT INTO orders (orderId, orderItem, orderDate) VALUE (?, ?, ?)</statement>
                       </jdbc-data-capture-service>
-                      <payload-from-metadata-service>
+                      <payload-from-template>
                         <unique-id>put-response-message</unique-id>
                         <metadata-tokens/>
                         <template>&lt;message&gt;&lt;status&gt;OK&lt;/status&gt;&lt;timestamp&gt;%message{timestamp}&lt;/timestamp&gt;&lt;/message&gt;</template>
-                      </payload-from-metadata-service>
+                      </payload-from-template>
                     </services>
                   </service-list>
                   <service-list>
@@ -196,11 +198,11 @@
                   <service-list>
                     <unique-id>not-found</unique-id>
                     <services>
-                      <payload-from-metadata-service>
+                      <payload-from-template>
                         <unique-id>error-response-message</unique-id>
                         <metadata-tokens/>
                         <template>&lt;message&gt;&lt;status&gt;ERROR&lt;/status&gt;&lt;timestamp&gt;%message{timestamp}&lt;/timestamp&gt;&lt;/message&gt;</template>
-                      </payload-from-metadata-service>
+                      </payload-from-template>
                       <add-metadata-service>
                         <unique-id>add-status</unique-id>
                         <metadata-element>
