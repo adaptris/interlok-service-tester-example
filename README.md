@@ -5,7 +5,7 @@ See this [blog](https://interlok.adaptris.net/blog/2018/07/03/testing-interlok-c
 ## Testing
 
 ```
-./gradlew interlokServiceTester
+./gradlew interlokServiceTest
 ```
 
 ## Running as Interlok adapter

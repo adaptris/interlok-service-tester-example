@@ -1,72 +1,36 @@
-buildscript {
-  ext {
-    adpCoreVersion = project.hasProperty('adpCoreVersion') ? project.getProperty('adpCoreVersion') : '3.8-SNAPSHOT'
-    defaultNexusRepo = project.hasProperty('defaultNexusRepo') ? project.getProperty('defaultNexusRepo') : 'https://repo1.maven.org/maven2/'
-  }
-  configure([buildscript.repositories, project.repositories]) {
-   maven { url "$defaultNexusRepo" }
-   maven { url "https://development.adaptris.net/nexus/content/groups/public" }
-   maven { url "https://development.adaptris.net/nexus/content/repositories/snapshots" }
-   maven { url "https://development.adaptris.net/nexus/content/repositories/releases" }
-  }
-  dependencies {
-    classpath ("com.adaptris:interlok-service-tester:$adpCoreVersion") {changing=true}
-    classpath  ("org.apache.ant:ant-junit:1.10.5")
-  }
-}
-
 plugins {
-  id "java"
-  id "distribution"
-  id "com.palantir.docker" version "0.19.2"
+  // https://github.com/nemerosa/versioning
+  id "net.nemerosa.versioning" version "2.14.0"
+  id "com.palantir.docker" version "0.35.0"
 }
-apply plugin: "com.adaptris.interlok-service-tester"
 
-distTar.enabled=false
-distZip.enabled=false
-dockerfileZip.enabled=false
-compileJava.enabled=false
-processResources.enabled=false
-classes.enabled=false
-jar.enabled=false
+ext {
+  interlokParentGradle = "https://raw.githubusercontent.com/adaptris/interlok-build-parent/main/v5/build.gradle"
+  interlokVersion = "5.0-SNAPSHOT"
+  // Include the WAR file since by default it is excluded.
+  includeWar="true"
+}
 
-configurations() {
-  war{}
+allprojects {
+  apply from: "${interlokParentGradle}"
+  // specify the version of the configuration.
+  version=versioning.info.full
 }
 
 dependencies {
-  compile ("com.adaptris:interlok-core:$adpCoreVersion") {changing=true}
-  compile ("com.adaptris:interlok-boot:$adpCoreVersion") {changing=true}
-  compile ("com.adaptris:interlok-varsub:$adpCoreVersion") {changing=true}
-  compile ("com.adaptris:interlok-service-tester:$adpCoreVersion") {changing=true}
-  compile ("mysql:mysql-connector-java:5.1.42")
-  war ("com.adaptris.ui:interlok:$adpCoreVersion@war") {changing=true}
-}
-
-distributions {
-  main {
-    contents {
-      from {
-        "$projectDir/src/main/interlok"
-      }
-      into('lib') {
-        from(project.configurations.runtime)
-      }
-      into('webapps') {
-        from(project.configurations.war)
-      }
-      rename '(.*)-[0-9]+\\..*.jar', '$1.jar'
-      rename '(.*)-[0-9]+\\..*.war', '$1.war'
-    }
-  }
+  interlokRuntime ("com.adaptris:interlok-core:$interlokVersion") {changing=true}
+  interlokRuntime ("com.adaptris:interlok-boot:$interlokVersion") {changing=true}
+  interlokRuntime ("com.adaptris:interlok-varsub:$interlokVersion") {changing=true}
+  interlokRuntime ("com.adaptris:interlok-service-tester:$interlokVersion") {changing=true}
+  interlokRuntime ("mysql:mysql-connector-java:5.1.42")
 }
 
 docker {
   name "adaptris/interlok-service-tester-example"
-  tags 'latest'
+  tags "latest"
   pull true
   files tasks.installDist.outputs
 }
 
 docker.dependsOn installDist
-installDist.dependsOn interlokServiceTester
+installDist.dependsOn interlokServiceTest
